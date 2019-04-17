@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 class Model {
   constructor(config) {
@@ -13,12 +13,15 @@ class Model {
     this.actions = {};
 
     Object.keys(reducers).forEach(type => {
+      // eslint-disable-next-line
       const action = (...args) => {
         this.dispatch({ type, payload: args });
         if (action.loading) {
-          return action.promise.then(payload => {
-            this.dispatch({ type, payload, loading: false });
-          });
+          const { promise } = action;
+          promise
+            .then(payload => this.dispatch({ type, payload, loading: false }))
+            .catch(() => this.dispatch({ type, loading: false }));
+          return promise;
         }
       };
       action.loading = false;
@@ -27,7 +30,14 @@ class Model {
 
     this.useModel = () => {
       const [, setState] = useState();
-      this.queue.push(setState);
+      // 使用useEffect实现发布订阅
+      useEffect(() => {
+        const index = this.queue.length;
+        this.queue.push(setState);
+        return () => {
+          this.queue.splice(index, 1);
+        };
+      });
       return [this.state, this.actions];
     };
 
@@ -67,7 +77,7 @@ class Model {
   }
 
   getNextState(action) {
-    const { type, payload, loading } = action;
+    const { type, payload = {}, loading } = action;
     const reducer = this.reducers[type];
 
     // 没有对应的actionType
@@ -79,7 +89,7 @@ class Model {
       return payload;
     }
     // 处理 action
-    const newState = reducer.apply(this, payload);
+    const newState = reducer.apply(this, payload) || {};
     const isPromise = newState instanceof Promise;
     // 同步的 action
     if (!isPromise) return newState;

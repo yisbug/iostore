@@ -1,11 +1,12 @@
 import { createModel } from '../index';
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import '@babel/polyfill';
 
 configure({ adapter: new Adapter() });
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 
 const sleep = t =>
   new Promise(resolve => {
@@ -34,19 +35,32 @@ const { useModel, isLoading } = model;
 
 const Person = () => {
   const [state, actions] = useModel();
-  console.log(`render Person, count: ${state.count}, name: ${state.name}`);
   const loading = isLoading(); // model级别的loading
   // action 级别的 loading： actions.asyncInc.loading
+  console.log(
+    `render Person, count: ${state.count}, name: ${state.name}`,
+    loading,
+    actions.asyncInc.loading
+  );
   return (
     <div>
       <span>{state.count}</span>
       <span>{String(loading)}</span>
       <span>{String(actions.asyncInc.loading)}</span>
-      <button onClick={() => actions.inc('a', 'b', 'c')}>btn1</button>
       <button
-        onClick={async () => {
-          await actions.asyncInc();
-          console.log('exec actions.asyncInc() done!');
+        onClick={() => {
+          console.log('click inc.');
+          actions.inc('a', 'b', 'c');
+        }}
+      >
+        btn1
+      </button>
+      <button
+        onClick={() => {
+          console.log('click async inc start.');
+          actions.asyncInc().then(() => {
+            console.log('exec actions.asyncInc() done!');
+          });
         }}
       >
         btn2
@@ -71,7 +85,7 @@ describe('useModel', () => {
   it('Person, PersonA', async () => {
     let wrapper = null;
 
-    wrapper = shallow(<Person />);
+    wrapper = mount(<Person />);
 
     const buttons = wrapper.find('button');
     const html = () =>
@@ -108,6 +122,8 @@ describe('useModel', () => {
     click(0);
     // log();
     assertCount('1');
+    // 等生命周期函数执行完毕
+    await sleep(100);
     click(1);
     assertLoading(true);
     // logLoading();
@@ -117,7 +133,7 @@ describe('useModel', () => {
     assertLoading(false);
     assertCount('2');
 
-    let copy = shallow(<PersonA />);
+    let copy = mount(<PersonA />);
     copy
       .find('button')
       .at(0)
