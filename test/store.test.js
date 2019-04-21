@@ -1,14 +1,15 @@
+import { createModel, useModel, useLoading } from '../src/index';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import '@babel/polyfill';
 
-import modelPerson from './person.model';
-const { useModel, useLoading } = modelPerson;
+import './person.model';
 
 configure({ adapter: new Adapter() });
 import { shallow, mount } from 'enzyme';
+
 const sleep = t => {
   return new Promise(resolve => {
     setTimeout(resolve, t);
@@ -16,8 +17,8 @@ const sleep = t => {
 };
 
 const Person = () => {
-  const [state, person] = useModel();
-  const loading = useLoading(); // model级别的loading
+  const [state, person] = useModel('person');
+  const loading = useLoading('person'); // model级别的loading
   // action 级别的 loading： person.asyncInc.loading
   const { count, name } = state;
   console.log(
@@ -53,7 +54,7 @@ const Person = () => {
 };
 
 const PersonA = () => {
-  const [state, person] = useModel();
+  const [state, person] = useModel('person');
   console.log('render PersonA, count:', state.count);
 
   return (

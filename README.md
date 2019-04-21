@@ -11,7 +11,7 @@
 ```js
 // model.js
 import {createModel} from 'react-hooks-model';
-export default createModel({
+export default createModel('person', {
   state: {
     count: 0,
     name: 'test'
@@ -26,28 +26,36 @@ export default createModel({
     return {
       count: this.state.count + 1
     };
+  },
+  helper:{
+    getFullName() {
+      const { name } = this.state;
+      return 'my full name is :' + name;
+    }
   }
 });
 
 // component.js
 import React from 'react';
-import { useModel,isLoading } from './model';
+import './model';
+import { useModel,useLoading } from 'react-hooks-model';
 
 export default () => {
-  const [state, actions] = useModel();
+  const [state, person] = useModel('person');
   console.log(`render Person, count: ${state.count}, name: ${state.name}`);
-  const loading = isLoading(); // model级别的loading
-  // action 级别的 loading： actions.asyncInc.loading
+  const loading = useLoading('person'); // model级别的loading
+  // action 级别的 loading： person.asyncInc.loading
   return (
     <div>
       <span>{state.count}</span>
       <span>{String(loading)}</span>
-      <span>{String(actions.asyncInc.loading)}</span>
-      <button onClick={() => actions.inc('a', 'b', 'c')}>btn1</button>
+      <span>{String(person.asyncInc.loading)}</span>
+      <span>{person.helper.getFullName()}</span>
+      <button onClick={() => person.inc('a', 'b', 'c')}>btn1</button>
       <button
         onClick={async () => {
-          await actions.asyncInc();
-          console.log('exec actions.asyncInc() done!');
+          await person.asyncInc();
+          console.log('exec person.asyncInc() done!');
         }}
       >
         btn2
