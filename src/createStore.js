@@ -7,9 +7,17 @@ const disableProps = ['loading', 'stores', 'useStore'];
 
 export default config => {
   const { namespace = '', ...rest } = config;
+  let service;
+  let isChanged = false;
+
+  const reducers = {};
+  const state = { namespace };
 
   if (!namespace) {
     throw new Error('Invalid params, namespace is required.');
+  }
+  if (stores[namespace]) {
+    throw new Error(`The namespace:${namespace} already exists.`);
   }
   disableProps.forEach(key => {
     if (!isUndefined(rest[key])) {
@@ -17,8 +25,6 @@ export default config => {
     }
   });
 
-  const reducers = {};
-  const state = {};
   Object.keys(rest).forEach(key => {
     if (isFunction(rest[key])) {
       reducers[key] = rest[key];
@@ -26,8 +32,6 @@ export default config => {
       state[key] = rest[key];
     }
   });
-
-  let isChanged = false;
 
   const checkReducersStatus = name => {
     const keys = Object.keys(reducers);
@@ -39,29 +43,28 @@ export default config => {
 
   const handler = {
     set(target, prop, newValue) {
+      if (disableProps.includes(prop) || isFunction(newValue)) {
+        target[prop] = newValue;
+        return true;
+      }
       if (!checkReducersStatus('unlock')) {
         console.error(
-          'Do not modify data within components, call a method of service to update the data.'
+          'Do not modify data within components, call a method of service to update the data.',
+          `namespace:${namespace}, prop:${prop}, value:${newValue}`
         );
       }
-      if (target[prop] !== newValue) isChanged = true;
+      if (target[prop] !== newValue) {
+        isChanged = true;
+      }
       target[prop] = addProxy(newValue, handler);
       return true;
     },
   };
-
-  let service = {
-    namespace,
-    stores,
-    useStore,
-    get loading() {
-      return checkReducersStatus('loading');
-    },
-    ...state,
-  };
+  service = addProxy(state, handler);
 
   const checkUpdateAndBroadcast = () => {
     if (isChanged) {
+      isChanged = false;
       broadcast(namespace, Math.random());
     }
   };
@@ -70,28 +73,42 @@ export default config => {
     service[key] = (...args) => {
       service[key].unlock = true;
       const promise = reducers[key].apply(service, args);
-      if (isPromise(promise)) {
-        isChanged = true;
-        service[key].loading = true;
-        service[key].unlock = true;
-        promise.finally(() => {
-          isChanged = true;
-          service[key].loading = false;
-          service[key].unlock = false;
-          checkUpdateAndBroadcast();
-        });
-        checkUpdateAndBroadcast();
-      } else {
-        checkUpdateAndBroadcast();
+      if (!isPromise(promise)) {
         service[key].unlock = false;
+        checkUpdateAndBroadcast();
+        return promise;
       }
-      return promise;
+      isChanged = true;
+      service[key].loading = true;
+      service[key].unlock = true;
+      checkUpdateAndBroadcast();
+      return new Promise((resolve, reject) => {
+        promise
+          .then(resolve)
+          .catch(reject)
+          .finally(() => {
+            isChanged = true;
+            service[key].loading = false;
+            service[key].unlock = false;
+            checkUpdateAndBroadcast();
+          });
+      });
     };
     service[key].loading = false;
     service[key].unlock = false;
   });
 
-  service = addProxy(service, handler);
+  Object.defineProperty(service, 'loading', {
+    get() {
+      return checkReducersStatus('loading');
+    },
+  });
+
+  Object.assign(service, {
+    stores,
+    useStore: () => useStore()[namespace],
+  });
+
   stores[namespace] = service;
   return service;
 };
