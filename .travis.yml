@@ -1,0 +1,8 @@
+sudo: required
+language: node_js
+node_js:
+  - '10'
+script:
+  - npm run test
+after_success:
+  - npm run coverage
