@@ -4,6 +4,8 @@
 
 极简的全局数据管理方案，忘掉 `redux`、`state`、`reducer`、`action`、`observer` 这些复杂的概念吧。
 
+[背景介绍](docs/about.md)
+
 ### 特性
 
 - 总计只有 100 多行代码。
