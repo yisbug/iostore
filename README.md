@@ -1,64 +1,205 @@
-### react-hooks-model
+### iostore
 
-用 redux 的流程太复杂了，看着就晕。
+由原 `react-hooks-model` 更名为 `iostore`。
 
-看着 react 16.8 新出的 hooks api 蛮好玩的，随便撸了一个简单的 model 用于数据管理，组件之间可以方便的共享数据。
+极简的全局数据管理方案，忘掉 `redux`、`state`、`reducer`、`action`、`observer` 这些复杂的概念吧。
 
-支持 action 级别和 model 级别的 loading。
+### 特性
 
-### Useage
+- 只有 100 多行代码。
+- 只需要学会两个 `API` 即可使用，非常简单：`createStore()`、`useStore()`。
+- 像普通的 `js` 对象一样定义 `store`。
+- 像普通的 `js` 对象一样使用定义的所有的数据和方法。
+- `store` 中定义的方法内部可任意修改数据，可直接返回数据，支持同步、异步方法。
+- 当数据发生变化时，自动触发组件渲染。基于`React Hooks API`，由框架实现了完整的单向数据流。
+- 集成异步方法的`loading`状态管理，目前最优雅的`loading`状态解决方案之一。
+
+和之前的方案相比：
+
+- 不再区分 `state`, `reducer`, `helper`，去掉了这些概念，更简单。
+- 定义 `store` 就像定义一个普通的 `js object` 一样，只需要传入一个 `namespace` 用于区分不同的 `store`。
+- 基于 `Proxy` 重新设计，数据变化，则自动通知组件，重新渲染。
+
+### 如何使用
+
+安装：
+
+```shell
+npm install iostore
+// or
+yarn add iostore
+```
+
+### API
+
+引入
 
 ```js
-// model.js
-import {createModel} from 'react-hooks-model';
-export default createModel('person', {
-  state: {
-    count: 0,
-    name: 'test'
+import { createStore, useStore } from 'iostore';
+```
+
+#### createStore(params)
+
+定义一个 store。参数：
+
+普通的 js 对象，必须指定一个`namespace`。
+
+```js
+createStore({
+  namespace: 'TodoStore',
+  getNs() {
+    return this.namespace;
   },
-  inc(a, b, c) {
-    return {
-      count: this.state.count + 1
-    };
+  ...rest, // 其余自定义的数据和方法
+});
+```
+
+#### useStore()
+
+在 `React` 函数式组件中引入所需 `store`。 无参数。
+得益于 ES6 中的解构赋值语法，我们从该方法的返回值中，单独声明所需的 store。如下：
+
+```js
+const Todo = () => {
+  const { TodoStore } = useStore();
+  // 之后便可以自由的使用 TodoStore 中定义的方法了。
+  const ns = TodoStore.getNs();
+  return <div>{ns}</div>;
+};
+```
+
+#### 关于 loading
+
+在对交互要求较高的场景下，获取异步方法的执行状态是非常必要的。
+
+例如显示一个 `loading` 页面告诉用户正在加载数据，按钮上显示一个`loading`样式提示用户该按钮已经被点击。
+
+当你使用`iostore`时，这一切变得非常简单。
+
+我们可以非常容易的获取到每一个异步方法的`loading`状态，甚至可以获取到一个`store`下有没有异步方法正在执行。
+
+- 获取`store`中有没有异步方法正在执行：`Store.loading`，返回 `true/false`
+- 获取`store`中某个异步方法的 loading 状态：`Store.asyncFunction.loading`，返回 `true/false`
+
+示例如下：
+
+```js
+// 定义 store
+createStore({
+  namespace: 'TodoStore',
+  id: 0,
+  async inc() {
+    await sleep(1000 * 5);
+    this.id++;
   },
-  async asyncInc() {
-    await sleep(1000);
-    return {
-      count: this.state.count + 1
-    };
-  },
-  helper:{
-    getFullName() {
-      const { name } = this.state;
-      return 'my full name is :' + name;
-    }
-  }
 });
 
-// component.js
-import React from 'react';
-import './model';
-import { useModel,useLoading } from 'react-hooks-model';
+// 获取 loading 状态
+const Todo = () => {
+  const { TodoStore } = useStore();
+  const handleClick = () => TodoStore.inc();
+  // TodoStore.loading  store 级别的 loading 状态
+  // TodoStore.inc.loading 某个异步方法的 loading 状态
+  return (
+    <button loading={TodoStore.inc.loading} onClick={handleClick}>
+      submit
+    </button>
+  );
+};
+```
 
+### 完整的 Todo 示例
+
+```js
+// TodoStore.js
+import store, { createStore, useStore } from 'iostore';
+export default createStore({
+  namespace: 'TodoStore', // store 命名空间
+  id: 0,
+  todos: [
+    {
+      id: 0,
+      content: 'first',
+      status: 'DOING',
+    },
+  ],
+  addTodo(content) {
+    this.id++;
+    const todo = {
+      id: this.id,
+      content,
+      status: 'DOING',
+    };
+    this.todos.push(todo);
+  },
+  getTodoById(id) {
+    return this.todos.filter(item => item.id === id)[0];
+  },
+  updateTodo(id, status) {
+    const todo = this.getTodoById(id);
+    if (!todo) return;
+    todo.status = status;
+  },
+  // test async function
+  incId: 0,
+  async delayIncId() {
+    await sleep(1000 * 3);
+    this.incId++;
+  },
+});
+
+// Todos.js
+import React, { useRef } from 'react';
+import store, { createStore, useStore } from '../src/index';
 export default () => {
-  const [state, person] = useModel('person');
-  console.log(`render Person, count: ${state.count}, name: ${state.name}`);
-  const loading = useLoading('person'); // model级别的loading
-  // action 级别的 loading： person.asyncInc.loading
+  /**
+   * 获取 TodoStore 的几种方式：
+   * const { TodoStore } = useStore(); // 更符合 React Hooks 的理念
+   * const { TodoStore } = store;
+   * const { TodoStore } = TodoStore.useStore();
+   */
+  const { TodoStore } = useStore();
+  const inputEl = useRef(null);
+  const handleClick = item => {
+    if (item.status === 'DOING') {
+      TodoStore.updateTodo(item.id, 'COMPLETED');
+    } else if (item.status === 'COMPLETED') {
+      TodoStore.updateTodo(item.id, 'DOING');
+    }
+  };
+  const handleAddTodo = () => {
+    console.warn('set data within component, should be got console.error : ');
+    TodoStore.todos[0].id = 1000;
+    const text = inputEl.current.value;
+    if (text) {
+      TodoStore.addTodo(text);
+    }
+  };
+  console.log('render', 'totos.length:' + TodoStore.todos.length);
   return (
     <div>
-      <span>{state.count}</span>
-      <span>{String(loading)}</span>
-      <span>{String(person.asyncInc.loading)}</span>
-      <span>{person.helper.getFullName()}</span>
-      <button onClick={() => person.inc('a', 'b', 'c')}>btn1</button>
-      <button
-        onClick={async () => {
-          await person.asyncInc();
-          console.log('exec person.asyncInc() done!');
-        }}
-      >
-        btn2
+      <div data-testid="incid">{TodoStore.incId}</div>
+      {!TodoStore.delayIncId.loading ? <div data-testid="incidfinish" /> : ''}
+
+      <div data-testid="incidloading">{TodoStore.delayIncId.loading ? 'loading' : 'completed'}</div>
+      <div data-testid="todocount">{TodoStore.todos.length}</div>
+      <ul data-testid="todolist">
+        {TodoStore.todos.map(item => {
+          return (
+            <li onClick={() => handleClick(item)} key={item.id}>
+              {item.content}
+              <span>{item.status}</span>
+            </li>
+          );
+        })}
+      </ul>
+      <input ref={inputEl} data-testid="todoinput" type="text" />
+      <button data-testid="todobtn" onClick={() => handleAddTodo()}>
+        add todo
+      </button>
+
+      <button data-testid="incbtn" onClick={() => TodoStore.delayIncId()}>
+        delay inc id
       </button>
     </div>
   );
