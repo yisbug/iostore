@@ -1,9 +1,11 @@
 import React from 'react';
 import { render, fireEvent, waitForElement, cleanup } from 'react-testing-library';
 import '@babel/polyfill';
-import { act } from 'react-dom/test-utils';
+// import { act } from 'react-dom/test-utils';
 import Todo from './todo';
-const sleep = async t => new Promise(resolve => setTimeout(resolve, t));
+
+// const sleep = async t => new Promise(resolve => setTimeout(resolve, t));
+
 describe('#iostore', () => {
   afterEach(cleanup);
   test('#todo, click, add todo', async () => {
@@ -58,9 +60,9 @@ describe('#iostore', () => {
   });
 
   test('#async inc id, test loading', async () => {
-    let { getByTestId } = render(<Todo />);
+    const { getByTestId } = render(<Todo />);
 
-    let loading = getByTestId('incidloading');
+    const loading = getByTestId('incidloading');
     // async incid
     expect(Number(getByTestId('incid').textContent)).toEqual(0);
     expect(loading.innerHTML).toEqual('completed');

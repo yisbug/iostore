@@ -1,9 +1,10 @@
 import React, { useRef } from 'react';
-import store, { createStore, useStore } from '../src/index';
+import { createStore, useStore } from '../src/index';
 
 const sleep = async t => new Promise(resolve => setTimeout(resolve, t));
 
-const TodoStore = createStore({
+// eslint-disable-next-line
+const todoStore = createStore({
   namespace: 'TodoStore',
   id: 0,
   todos: [
@@ -43,9 +44,9 @@ export default () => {
    * 获取 TodoStore 的几种方式：
    * const { TodoStore } = useStore(); // 更符合 React Hooks 的理念
    * const { TodoStore } = store;
-   * const { TodoStore } = TodoStore.useStore();
+   * const TodoStore = todoStore.useStore();
    */
-  const { TodoStore } = store;
+  const { TodoStore } = useStore();
   const inputEl = useRef(null);
   const handleClick = item => {
     if (item.status === 'DOING') {
@@ -62,7 +63,7 @@ export default () => {
       TodoStore.addTodo(text);
     }
   };
-  console.log('render', 'totos.length:' + TodoStore.todos.length);
+  console.log('render', `totos.length:${TodoStore.todos.length}`);
   return (
     <div>
       <div data-testid="incid">{TodoStore.incId}</div>
@@ -73,7 +74,7 @@ export default () => {
       <ul data-testid="todolist">
         {TodoStore.todos.map(item => {
           return (
-            <li onClick={() => handleClick(item)} key={item.id}>
+            <li key={item.id} onClick={() => handleClick(item)}>
               {item.content}
               <span>{item.status}</span>
             </li>
@@ -81,11 +82,11 @@ export default () => {
         })}
       </ul>
       <input ref={inputEl} data-testid="todoinput" type="text" />
-      <button data-testid="todobtn" onClick={() => handleAddTodo()}>
+      <button type="button" data-testid="todobtn" onClick={() => handleAddTodo()}>
         add todo
       </button>
 
-      <button data-testid="incbtn" onClick={() => TodoStore.delayIncId()}>
+      <button type="button" data-testid="incbtn" onClick={() => TodoStore.delayIncId()}>
         delay inc id
       </button>
     </div>

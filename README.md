@@ -181,12 +181,14 @@ export default createStore({
 // Todos.js
 import React, { useRef } from 'react';
 import store, { createStore, useStore } from '../src/index';
+import todoStore from './TodoStore';
+
 export default () => {
   /**
    * 获取 TodoStore 的几种方式：
    * const { TodoStore } = useStore(); // 更符合 React Hooks 的理念
    * const { TodoStore } = store;
-   * const { TodoStore } = TodoStore.useStore();
+   * const TodoStore = todoStore.useStore();
    */
   const { TodoStore } = useStore();
   const inputEl = useRef(null);
