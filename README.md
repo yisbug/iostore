@@ -1,16 +1,16 @@
 ### iostore
 
-由原 `react-hooks-model` 更名为 `iostore`。
-
-极简的全局数据管理方案，忘掉 `redux`、`state`、`reducer`、`action`、`observer` 这些复杂的概念吧。
-
-[背景介绍](docs/about.md)
-
 [![NPM version](https://img.shields.io/npm/v/iostore.svg?style=flat)](https://npmjs.org/package/iostore)
 [![build status](https://img.shields.io/travis/yisbug/iostore.svg?style=flat-square)](https://travis-ci.org/yisbug/iostore)
 [![Test coverage](https://img.shields.io/codecov/c/github/yisbug/iostore.svg?style=flat-square)](https://codecov.io/gh/yisbug/iostore)
 [![Known Vulnerabilities](https://snyk.io/test/npm/iostore/badge.svg)](https://snyk.io/test/npm/iostore)
 [![David deps](https://img.shields.io/david/yisbug/iostore.svg?style=flat-square)](https://david-dm.org/yisbug/iostore)
+
+[背景介绍](docs/about.md)
+
+由原 `react-hooks-model` 更名为 `iostore`。
+
+极简的全局数据管理方案，忘掉 `redux`、`state`、`reducer`、`action`、`observer` 这些复杂的概念吧。
 
 ### 特性
 
