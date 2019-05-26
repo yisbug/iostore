@@ -48,6 +48,7 @@ export default () => {
    */
   const { TodoStore } = useStore();
   const inputEl = useRef(null);
+  const { loading } = TodoStore;
   const handleClick = item => {
     if (item.status === 'DOING') {
       TodoStore.updateTodo(item.id, 'COMPLETED');
@@ -66,6 +67,10 @@ export default () => {
   console.log('render', `totos.length:${TodoStore.todos.length}`);
   return (
     <div>
+      <div>
+        store loading:
+        {loading}
+      </div>
       <div data-testid="incid">{TodoStore.incId}</div>
       {!TodoStore.delayIncId.loading ? <div data-testid="incidfinish" /> : ''}
 
