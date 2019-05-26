@@ -55,4 +55,28 @@ describe('#createStore', () => {
     };
     expect(setName()).toEqual('hello');
   });
+
+  test('recreating store', () => {
+    const store = createStore({
+      namespace: 'testStore111',
+      name: 'test',
+    });
+    const store1 = createStore({
+      namespace: 'testStore111',
+      name: 'test1',
+    });
+    expect(store).toEqual(store1);
+  });
+
+  test('store.useStore()', () => {
+    const store = createStore({
+      namespace: 'teststore222',
+      name: 'test',
+    });
+    const tryUseStore = () => {
+      store.useStore();
+    };
+
+    expect(tryUseStore).toThrowErrorMatchingSnapshot();
+  });
 });
