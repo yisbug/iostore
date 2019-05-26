@@ -17,7 +17,7 @@ export default config => {
     throw new Error('Invalid params, namespace is required.');
   }
   if (stores[namespace]) {
-    throw new Error(`The namespace:${namespace} already exists.`);
+    return stores[namespace];
   }
   disableProps.forEach(key => {
     if (!isUndefined(rest[key])) {
