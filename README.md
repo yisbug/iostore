@@ -6,6 +6,12 @@
 
 [背景介绍](docs/about.md)
 
+[![NPM version](https://img.shields.io/npm/v/iostore.svg?style=flat)](https://npmjs.org/package/iostore)
+[![build status](https://img.shields.io/travis/yisbug/iostore.svg?style=flat-square)](https://travis-ci.org/yisbug/iostore)
+[![Test coverage](https://img.shields.io/codecov/c/github/yisbug/iostore.svg?style=flat-square)](https://codecov.io/gh/yisbug/iostore)
+[![Known Vulnerabilities](https://snyk.io/test/npm/iostore/badge.svg)](https://snyk.io/test/npm/iostore)
+[![David deps](https://img.shields.io/david/yisbug/iostore.svg?style=flat-square)](https://david-dm.org/yisbug/iostore)
+
 ### 特性
 
 - 总计只有 100 多行代码。

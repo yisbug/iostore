@@ -3,7 +3,9 @@
   "version": "0.0.3",
   "main": "src/index.js",
   "scripts": {
-    "test": "jest --watchAll"
+    "test": "NODE_ENV=unittest jest",
+    "test:w": "jest --watchAll",
+    "coverage": "codecov"
   },
   "author": "yisbug@qq.com",
   "license": "MIT",
@@ -14,6 +16,7 @@
     "@babel/preset-react": "^7.0.0",
     "babel-eslint": "^10.0.1",
     "babel-jest": "^24.7.1",
+    "codecov": "^3.5.0",
     "enzyme": "^3.9.0",
     "enzyme-adapter-react-16": "^1.12.1",
     "eslint": "^5.16.0",
@@ -34,6 +37,8 @@
     "react-dom": ">=16.8.6"
   },
   "jest": {
-    "testRegex": "(/test/.*\\.test\\.js)$"
+    "testRegex": "(/test/.*\\.test\\.js)$",
+    "coverageDirectory": "./coverage/",
+    "collectCoverage": true
   }
 }
