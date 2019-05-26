@@ -6,7 +6,7 @@ import useStore from './useStore';
 const disableProps = ['loading', 'stores', 'useStore'];
 
 export default config => {
-  const { namespace = '', helper = {}, ...rest } = config;
+  const { namespace = '', ...rest } = config;
 
   if (!namespace) {
     throw new Error('Invalid params, namespace is required.');
@@ -54,7 +54,6 @@ export default config => {
     namespace,
     stores,
     useStore,
-    helper: {},
     get loading() {
       return checkReducersStatus('loading');
     },
@@ -67,9 +66,6 @@ export default config => {
     }
   };
 
-  Object.keys(helper).forEach(key => {
-    service.helper[key] = (...args) => helper[key].apply(service, args);
-  });
   Object.keys(reducers).forEach(key => {
     service[key] = (...args) => {
       service[key].unlock = true;
