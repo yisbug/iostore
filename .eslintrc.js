@@ -6,4 +6,7 @@ module.exports = {
     es6: true,
     jest: true,
   },
+  rules: {
+    'no-param-reassign': 0,
+  },
 };
