@@ -74,4 +74,11 @@ describe('#iostore', () => {
     console.log('loading', loading.innerHTML);
     console.log('incid', getByTestId('incid').textContent);
   });
+
+  test('#update null', async () => {
+    const { getByTestId } = render(<Todo />);
+    const nullbtn = getByTestId('nullbtn');
+    fireEvent.click(nullbtn);
+    expect(getByTestId('testNull').innerHTML).toEqual('testname');
+  });
 });

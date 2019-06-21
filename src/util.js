@@ -7,7 +7,7 @@ export const isPromise = fn => {
   return isObject(fn) && isFunction(fn.then);
 };
 export const addProxy = (o, handler) => {
-  if (!isObject(o)) return o;
+  if (!isObject(o) || o === null) return o;
   if (isArray(o)) {
     o.forEach((item, index) => {
       if (isObject(item)) {

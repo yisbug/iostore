@@ -7,6 +7,7 @@ const sleep = async t => new Promise(resolve => setTimeout(resolve, t));
 const todoStore = createStore({
   namespace: 'TodoStore',
   id: 0,
+  testNull: null,
   todos: [
     {
       id: 0,
@@ -22,6 +23,9 @@ const todoStore = createStore({
       status: 'DOING',
     };
     this.todos.push(todo);
+  },
+  updateNull() {
+    this.testNull = { name: 'testname' };
   },
   getTodoById(id) {
     return this.todos.filter(item => item.id === id)[0];
@@ -72,6 +76,7 @@ export default () => {
         {loading}
       </div>
       <div data-testid="incid">{TodoStore.incId}</div>
+      <div data-testid="testNull">{TodoStore.testNull ? TodoStore.testNull.name : ''}</div>
       {!TodoStore.delayIncId.loading ? <div data-testid="incidfinish" /> : ''}
 
       <div data-testid="incidloading">{TodoStore.delayIncId.loading ? 'loading' : 'completed'}</div>
@@ -93,6 +98,10 @@ export default () => {
 
       <button type="button" data-testid="incbtn" onClick={() => TodoStore.delayIncId()}>
         delay inc id
+      </button>
+
+      <button type="button" data-testid="nullbtn" onClick={() => TodoStore.updateNull()}>
+        update null
       </button>
     </div>
   );
