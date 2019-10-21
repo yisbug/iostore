@@ -80,7 +80,6 @@ export default config => {
       }
       isChanged = true;
       service[key].loading = true;
-      service[key].unlock = true;
       checkUpdateAndBroadcast();
       return new Promise((resolve, reject) => {
         promise
