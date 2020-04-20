@@ -22,5 +22,7 @@ export const addProxy = (o, handler) => {
   } else {
     return o;
   }
+  // eslint-disable-next-line
+  if (o && o.__isProxy__) return o;
   return new Proxy(o, handler);
 };

@@ -68,7 +68,6 @@ export default () => {
       TodoStore.addTodo(text);
     }
   };
-  console.log('render', `totos.length:${TodoStore.todos.length}`);
   return (
     <div>
       <div>

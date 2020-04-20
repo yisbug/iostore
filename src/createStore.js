@@ -59,6 +59,10 @@ export default config => {
       target[prop] = addProxy(newValue, handler);
       return true;
     },
+    get(target, prop) {
+      if (prop === '__isProxy__') return true;
+      return target[prop];
+    },
   };
   service = addProxy(state, handler);
 
