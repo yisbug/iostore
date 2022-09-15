@@ -56,6 +56,7 @@ export default config => {
       if (target[prop] !== newValue) {
         isChanged = true;
       }
+      delete target[prop];
       target[prop] = addProxy(newValue, handler);
       return true;
     },
