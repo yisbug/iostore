@@ -75,9 +75,13 @@ export default config => {
   };
 
   Object.keys(reducers).forEach(key => {
-    service[key] = (...args) => {
+    // 将所有方法(通常会改变state)设置成异步代码
+    // 这样子组件的effect即使比父组件的effect先执行(react hook rule)
+    // 方法还是会等父组件的effect先执行完再执行
+    // 这样不会出现数据改变时, queue为空的情况
+    service[key] = async (...args) => {
       service[key].unlock = true;
-      const promise = reducers[key].apply(service, args);
+      const promise = await reducers[key].apply(service, args);
       if (!isPromise(promise)) {
         service[key].unlock = false;
         checkUpdateAndBroadcast();
@@ -85,7 +89,6 @@ export default config => {
       }
       isChanged = true;
       service[key].loading = true;
-      service[key].unlock = true;
       checkUpdateAndBroadcast();
       return new Promise((resolve, reject) => {
         promise
