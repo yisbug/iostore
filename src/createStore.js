@@ -67,10 +67,18 @@ export default config => {
   };
   service = addProxy(state, handler);
 
+  let timer = null;
   const checkUpdateAndBroadcast = () => {
     if (isChanged) {
       isChanged = false;
-      broadcast(namespace, Math.random());
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
+      timer = setTimeout(() => {
+        timer = null;
+        broadcast(namespace, Math.random());
+      }, 0);
     }
   };
 
